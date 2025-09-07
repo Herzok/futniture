@@ -1,0 +1,14 @@
+<odoo>
+    <record id="model_furniture_orders" model="ir.model">
+        <field name="name">Orders for creation furniture</field>
+        <field name="model">furniture.orders</field>
+    </record>
+    <record id="model_furniture_devices" model="ir.model">
+        <field name="name">devices</field>
+        <field name="model">furniture.devices</field>
+    </record>
+    <record id="model_furniture_devices_work" model="ir.model">
+        <field name="name">service devices</field>
+        <field name="model">furniture.devices_work</field>
+    </record>
+</odoo>

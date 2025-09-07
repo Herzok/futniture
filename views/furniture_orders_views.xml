@@ -1,0 +1,218 @@
+<odoo>
+<!--
+    <template id="assets_frontend" inherit_id="web.assets_backend" name="kanban vertical list assets">
+        <xpath expr="." position="after">
+            <link rel="stylesheet" href="/furniture_orders/static/src/css/kanban.css"/>
+        </xpath>
+    </template>
+    Стили не подцепляются для создания списка карточек, система не может найти web.assets_backend, по какой причине, я не знаю
+-->
+    <record id="view_search" model="ir.ui.view">
+        <field name="name">furniture.orders.search</field>
+        <field name="model">furniture.orders</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="status"/>
+
+                <filter name='status_1' string="В работе" domain="[('status','=','in_process')]"/>
+                <filter name='status_2' string="Готово" domain="[('status','=','ready_for_prod')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Древовидный список заказов -->
+    <record id="view_furniture_orders_tree" model="ir.ui.view">
+        <field name="name">furniture.orders.list</field>
+        <field name="model">furniture.orders</field>
+        <field name="arch" type="xml">
+        <kanban class="kanban-vertical-list" create='false'><!--default_group_by="status"-->
+            <field name="name_order"/>
+            <field name="number_order"/>
+            <field name="status"/>
+            <field name="date_start"/>
+            <field name="date_end"/>
+            <field name="desc"/>
+            <field name='reason'/>
+            <templates>
+                <t t-name="kanban-box" t-if="record.status.raw_value != 'done'">
+                    <div class="oe_kanban_card">
+                        <div>
+                            <strong>Заказ №<t t-esc="record.number_order.value"/></strong>
+                            <span> <t t-esc="record.name_order.value"/></span>
+                        </div>
+                        <div>
+                            Описание:<span> <t t-esc="record.desc.value"/></span>
+                        </div>
+                        <div>
+                            <div>Статус: <t t-esc="record.status.value"/></div>
+                            <t t-if="record.status.raw_value == 'in_process'">
+                                <div>
+                                    <div>Начало работ: <t t-esc="record.date_start.value"/></div>
+                                    <div>Окончание работ: <t t-esc="record.date_end.value"/></div>
+                                </div>
+                            </t>
+                            <t t-if="record.status.raw_value == 'defective' or record.status.raw_value == 'cancel'">
+                                <div>
+                                    Причина:<t t-esc="record.reason.value"/>
+                                </div>
+                            </t>    
+                        </div>
+                        <footer>
+                            <t t-if="record.status.raw_value == 'ready_for_prod'">
+                                <button type="object"
+                                        name="action_take"
+                                        string="Взять в работу"
+                                        class="btn-primary"
+                                        groups="furniture_orders.group_worker"/>    
+                            </t>                      
+                            <t t-if="record.status.raw_value == 'in_process'">
+                                <button type="object" 
+                                    name="action_finish" 
+                                    string="Завершить" 
+                                    class="btn-success"
+                                    groups="furniture_orders.group_worker"/>
+                                <button type="object"
+                                    name="open_reject_wizard"
+                                    string="Брак"
+                                    class="btn-dark"
+                                    groups="furniture_orders.group_worker"/>
+                            </t>
+                            <t t-if="record.status.raw_value == 'in_process' or record.status.raw_value == 'ready_for_prod'">
+                                <button type="object"
+                                    name="open_cancel_wizard"
+                                    string="Не выполнить"
+                                    class="btn-red"
+                                    groups="furniture_orders.group_worker"/>
+                            </t>
+                        </footer>
+                    </div>
+                </t>
+            </templates>
+        </kanban>
+        </field>
+    </record>
+    
+    <!-- Action для открытия списка заказов -->
+    <record id="action_furniture_orders_all" model="ir.actions.act_window">
+        <field name="name">Furniture Orders</field>
+        <field name="res_model">furniture.orders</field>
+        <field name="view_mode">kanban</field>
+        <field name="domain">['|', ('status','=','ready_for_prod'), ('status','=','in_process')]</field>
+        <!--<field name="search_view_id" ref="view_search"/>-->
+    </record>
+    <record id="action_furniture_orders_ready_prod" model="ir.actions.act_window">
+        <field name="name">Furniture Orders</field>
+        <field name="res_model">furniture.orders</field>
+        <field name="view_mode">kanban</field>
+        <field name="domain">[('status','=','ready_for_prod')]</field>
+    </record>
+    <record id="action_furniture_orders_in_process" model="ir.actions.act_window">
+        <field name="name">Заказы в процессе</field>
+        <field name="res_model">furniture.orders</field>
+        <field name="view_mode">kanban</field>
+        <field name="domain">[('status','=','in_process'), ('employee_id','=',uid)]</field>
+    </record>
+    <record id="action_furniture_orders_repeat_prod" model="ir.actions.act_window">
+        <field name="name">Бракованные заказы</field>
+        <field name="res_model">furniture.orders</field>
+        <field name="view_mode">kanban</field>
+        <field name="domain">[('status','=','defective')]</field>
+    </record>
+        <record id="action_furniture_orders_cancel" model="ir.actions.act_window">
+        <field name="name">Отмененные</field>
+        <field name="res_model">furniture.orders</field>
+        <field name="view_mode">kanban</field>
+        <field name="domain">['|', ('status','=','unfinished'), ('status','=','cancel')]</field>
+    </record>
+
+    <!-- Корневое меню -->
+    <menuitem id="menu_furniture_root"
+              name="Заказы мебели"
+              groups="furniture_orders.group_worker,furniture_orders.group_controller"
+              sequence="10"/>
+    <menuitem id="menu_cancel_orders_root"
+              name="Списанные заказы"
+              sequence="10"
+              groups="furniture_orders.group_controller"/>
+
+    <!-- Подменю для заказов-->
+    <menuitem id="menu_furniture_orders_all"
+              name="Все заказы"
+              parent="menu_furniture_root"
+              action="action_furniture_orders_all"
+              groups="furniture_orders.group_controller"
+              sequence="1"/>
+
+    <menuitem id="menu_furniture_orders_rd"
+              name="Готовые к производству"
+              parent="menu_furniture_root"
+              action="action_furniture_orders_ready_prod"
+              groups="furniture_orders.group_worker"
+              sequence="2"/>
+    <menuitem id="menu_furniture_orders_ip"
+              name="В процессе"
+              parent="menu_furniture_root"
+              action="action_furniture_orders_in_process"
+              groups="furniture_orders.group_worker"
+              sequence="3"/>
+    <!-- Подменю для списанных заказов-->
+    <menuitem id="menu_furniture_orders_rp"
+              name="Повторное производство"
+              parent="menu_cancel_orders_root"
+              action="action_furniture_orders_repeat_prod"
+              groups="furniture_orders.group_controller"
+              sequence="2"/>
+    <menuitem id="menu_furniture_orders_c"
+              name="Списанные заказы"
+              parent="menu_cancel_orders_root"
+              action="action_furniture_orders_cancel"
+              groups="furniture_orders.group_controller"
+              sequence="1"/>
+
+
+    <!--Форма указания причины брака-->
+    <record id="view_furniture_order_reject_wizard_form" model="ir.ui.view">
+        <field name="name">furniture.orders.form</field>
+        <field name="model">furniture.orders</field>
+        <field name="arch" type="xml">
+            <form string="Причина брака">
+                <sheet>
+                    <group>
+                        <field name="reason" string="Причина:"/>
+                    </group>
+                    <footer>
+                        <button string="Подтвердить"
+                            type="object"
+                            name="action_confirm_reject"
+                            class="btn-primary"/>
+                        <button string="Отмена"
+                            class="btn-secondary"
+                            special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_furniture_order_cancel_wizard_form" model="ir.ui.view">
+        <field name="name">furniture.orders.form</field>
+        <field name="model">furniture.orders</field>
+        <field name="arch" type="xml">
+            <form string="Причина брака">
+                <sheet>
+                    <group>
+                        <field name="reason" string="Причина:"/>
+                    </group>
+                    <footer>
+                        <button string="Подтвердить"
+                            type="object"
+                            name="action_confirm_cancel"
+                            class="btn-primary"/>
+                        <button string="Отмена"
+                            class="btn-secondary"
+                            special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,20 @@
+/* Контейнер Kanban */
+.kanban-vertical-list .o_kanban_view {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+/* Убираем колонки */
+.kanban-vertical-list .o_kanban_group {
+    display: contents !important;
+}
+
+/* Карточки */
+.kanban-vertical-list .oe_kanban_card {
+    width: 60% !important;
+    margin: 10px 0 !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    background-color: #fff;
+}

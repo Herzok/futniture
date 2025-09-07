@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_furniture_devices_controller,furniture.devices controller,furniture_orders.model_furniture_devices,furniture_orders.group_controller,1,1,1,0
+access_furniture_devices_admin,furniture.devices admin,furniture_orders.model_furniture_devices,furniture_orders.group_admin,1,1,1,1
+
+access_furniture_devices_work_controller,furniture.devices_work controller,furniture_orders.model_furniture_devices_work,furniture_orders.group_controller,1,1,1,0
+access_furniture_devices_work_admin,furniture.devices_work admin,furniture_orders.model_furniture_devices_work,furniture_orders.group_admin,1,1,1,1
+
+access_furniture_orders_admin,furniture.orders admin,furniture_orders.model_furniture_orders,furniture_orders.group_admin,1,1,1,1
+access_furniture_orders_worker,furniture.orders worker,furniture_orders.model_furniture_orders,furniture_orders.group_worker,1,1,1,0
+access_furniture_orders_controller,furniture.orders controller,furniture_orders.model_furniture_orders,furniture_orders.group_controller,1,1,1,0

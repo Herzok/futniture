@@ -1,0 +1,114 @@
+<odoo>
+    <!--список оборудования-->
+    <record id="view_furniture_devices_list" model="ir.ui.view">
+        <field name="name">furniture.devices.list</field>
+        <field name="model">furniture.devices</field>
+        <field name="arch" type="xml">
+        <kanban class="kanban-vertical-list" create='false'>
+            <field name="name_device"/>
+            <field name="status"/>
+            <templates>
+                <t t-name="kanban-box">
+                    <div class="oe_kanban_card">
+                        <div>
+                            <strong>Станок <t t-esc="record.name_device.value"/></strong>
+                        </div>
+                        <div>
+                            Статус: <t t-esc="record.status.value"/>
+                        </div>
+                    </div>
+                </t>
+            </templates>
+        </kanban>
+        </field>
+    </record>
+
+    <!--список работ-->
+    <record id="view_furniture_devices_work_list" model="ir.ui.view">
+        <field name="name">furniture.devices_work.list</field>
+        <field name="model">furniture.devices_work</field>
+        <field name="arch" type="xml">
+        <kanban class="kanban-vertical-list">
+            <field name="device_id"/>
+            <field name="desc_work"/>
+            <field name="date_start"/>
+            <field name="date_end"/>
+            <field name="status"/>
+            <field name="type"/>
+            <templates>
+                <t t-name="kanban-box">
+                    <div class="oe_kanban_card">
+                        <div>
+                            <strong>Станок <t t-esc="record.device_id.raw_value"/></strong>
+                        </div>
+                        <div>
+                            Тип работ: <t t-esc="record.type.value"/>
+                        </div>
+                        <div>
+                            Статус: <t t-esc="record.status.value"/>
+                        </div>
+                        <div>
+                            Описание работ: <t t-esc="record.desc_work.value"/>
+                        </div>
+                        <div>
+                            Дата начала: <t t-esc="record.date_start.value"/>
+                        </div>
+                        <div>
+                             Дата конца: <t t-esc="record.date_end.value"/>
+                        </div>
+                        <footer>
+                            <t t-if="record.status.raw_value == 'planed'">
+                                <button type="object"
+                                        name="action_take_work"
+                                        string="Взять в работу"
+                                        class="btn-primary"
+                                        groups="furniture_orders.group_controller"/>    
+                            </t>                      
+                            <t t-if="record.status.raw_value == 'in_process'">
+                                <button type="object" 
+                                    name="action_finish_work" 
+                                    string="Завершить" 
+                                    class="btn-success"
+                                    groups="furniture_orders.group_controller"/>
+                            </t>
+                        </footer>
+                    </div>
+                </t>
+            </templates>
+        </kanban>
+        </field>
+    </record>
+
+    <!-- Action для открытия оборудования -->
+    <record id="action_furniture_devices" model="ir.actions.act_window">
+        <field name="name">Оборудование</field>
+        <field name="res_model">furniture.devices</field>
+        <field name="view_mode">kanban</field>
+    </record>
+    <record id="action_furniture_devices_work" model="ir.actions.act_window">
+        <field name="name">Обслуживание оборудования</field>
+        <field name="res_model">furniture.devices_work</field>
+        <field name="view_mode">kanban</field>
+    </record>
+
+    <!-- Корневое меню -->
+    <menuitem id="menu_devices_root"
+              name="Оборудование"
+              groups="furniture_orders.group_controller,furniture_orders.group_admin"
+              sequence="10"/>
+
+
+    <!-- Подменю для оборудования-->
+    <menuitem id="menu_furniture_devices"
+              name="Оборудование"
+              parent="menu_devices_root"
+              action="action_furniture_devices"
+              groups="furniture_orders.group_controller,furniture_orders.group_admin"
+              sequence="1"/>
+    <menuitem id="menu_furniture_devices_work"
+              name="Работы с оборудованием"
+              parent="menu_devices_root"
+              action="action_furniture_devices_work"
+              groups="furniture_orders.group_controller,furniture_orders.group_admin"
+              sequence="2"/>
+</odoo>
